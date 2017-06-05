@@ -14,11 +14,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.IllegalFormatCodePointException;
 import java.util.concurrent.ExecutionException;
@@ -36,6 +38,7 @@ public class Banner extends FrameLayout implements ViewPager.OnPageChangeListene
     private int pageCount = 0;
     private ScheduledThreadPoolExecutor ste;
     private Handler handler;
+    PagerScrollSpeed scrollSpeed;
 
     public Banner(@NonNull Context context) {
         super(context);
@@ -51,6 +54,7 @@ public class Banner extends FrameLayout implements ViewPager.OnPageChangeListene
         View view = LayoutInflater.from(context).inflate(R.layout.pager_item, this, true);
 
         viewPager = (ViewPager) view.findViewById(R.id.view_pager);
+        setScrollSpeed();
         dotLayout = (LinearLayout) view.findViewById(R.id.dot_layout);
 
         handler = new Handler(new Handler.Callback() {
@@ -134,6 +138,7 @@ public class Banner extends FrameLayout implements ViewPager.OnPageChangeListene
         switch (ev.getAction()){
             case MotionEvent.ACTION_DOWN:
                 stopAutoPlay();
+                scrollSpeed.setScrollSpeed(100);
                 break;
             default:
                 break;
@@ -205,6 +210,18 @@ public class Banner extends FrameLayout implements ViewPager.OnPageChangeListene
         ste.scheduleWithFixedDelay(runnable, 1, 2, TimeUnit.SECONDS);
     }
 
+    //利用反射设置ViewPager滚动速度
+    private void setScrollSpeed(){
+        try {
+            Field field = ViewPager.class.getDeclaredField("mScroller");
+            field.setAccessible(true);
+            scrollSpeed = new PagerScrollSpeed(getContext(), new AccelerateInterpolator());
+            field.set(viewPager, scrollSpeed);
+
+        }catch (Exception e){
+            Log.i(TAG, "setScrollSpeedError: " + e.getMessage());
+        }
+    }
 
     private void stopAutoPlay(){
         ste.shutdown();
