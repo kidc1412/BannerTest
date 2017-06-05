@@ -172,7 +172,7 @@ public class Banner extends FrameLayout implements ViewPager.OnPageChangeListene
             iv.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), "你点击了第" + getRealPosition(position) + "图",
+                    Toast.makeText(getContext(), "你点击了第" + (getRealPosition(position) + 1) + "图",
                             Toast.LENGTH_SHORT).show();
                 }
             });
